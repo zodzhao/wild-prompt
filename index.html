@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>AETHERIA // 4D Singularity Engine</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <canvas
+      id="singularity-canvas"
+      aria-label="Interactive 3D relativistic black hole, 4D polytope megastructure, and gravity sandbox"
+    ></canvas>
+
+    <!-- Live region outside toolbar for screen-reader action feedback -->
+    <p id="hud-status" role="status" class="visually-hidden"></p>
+
+    <!-- Visual HUD Layer -->
+    <div id="hud-root" class="hud-root">
+      <!-- Top-Left Telemetry Header -->
+      <header class="hud-header">
+        <div class="brand-lockup">
+          <span class="brand-dot" aria-hidden="true"></span>
+          <div>
+            <h1 class="brand-title">AETHERIA</h1>
+            <p id="realm-subtitle" class="brand-subtitle">REALM I // GARGANTUA KERR SINGULARITY</p>
+          </div>
+        </div>
+
+        <dl class="telemetry-grid" aria-label="Live singularity telemetry">
+          <div class="telemetry-item">
+            <dt>MASS</dt>
+            <dd id="stat-mass">4.30M M☉</dd>
+          </div>
+          <div class="telemetry-item">
+            <dt>4D PHASE</dt>
+            <dd id="stat-phase">0° XW</dd>
+          </div>
+          <div class="telemetry-item">
+            <dt>STARS</dt>
+            <dd id="stat-stars">2</dd>
+          </div>
+          <div class="telemetry-item">
+            <dt>FPS</dt>
+            <dd id="stat-fps">60</dd>
+          </div>
+        </dl>
+      </header>
+
+      <!-- Top-Right Quick Controls Hint -->
+      <aside class="hud-hints" aria-label="Interaction shortcuts">
+        <p><kbd>Drag</kbd> Orbit &nbsp;·&nbsp; <kbd>Shift+Drag</kbd> Slingshot Star</p>
+        <p><kbd>1-5</kbd> Realms &nbsp;·&nbsp; <kbd>Space</kbd> Time Dilation &nbsp;·&nbsp; <kbd>H</kbd> Hide HUD</p>
+      </aside>
+
+      <!-- Bottom Composite Toolbar & Docked Toast -->
+      <div class="hud-dock-wrap">
+        <!-- Transient Event Toast sits cleanly above the toolbar, never overlapping header telemetry -->
+        <div id="event-toast" class="event-toast" aria-hidden="true"></div>
+
+        <div
+          id="main-toolbar"
+          role="toolbar"
+          focusgroup="toolbar wrap"
+          aria-label="Singularity engine controls"
+          aria-controls="singularity-canvas"
+          class="hud-toolbar"
+        >
+          <!-- Realm Switcher Group -->
+          <div role="group" aria-label="Reality realms" class="toolbar-group">
+            <button type="button" class="hud-btn realm-btn" data-realm="0" aria-pressed="true" title="Realm 1: Gargantua Black Hole (Key 1)">
+              Gargantua
+            </button>
+            <button type="button" class="hud-btn realm-btn" data-realm="1" aria-pressed="false" title="Realm 2: 4D Quantum Lattice (Key 2)">
+              4D Lattice
+            </button>
+            <button type="button" class="hud-btn realm-btn" data-realm="2" aria-pressed="false" title="Realm 3: Mandelbulb Abyss (Key 3)">
+              Mandelbulb
+            </button>
+            <button type="button" class="hud-btn realm-btn" data-realm="3" aria-pressed="false" title="Realm 4: Millisecond Pulsar (Key 4)">
+              Pulsar
+            </button>
+            <button type="button" class="hud-btn realm-btn" data-realm="4" aria-pressed="false" title="Realm 5: Stargate Hyperspace (Key 5)">
+              Stargate
+            </button>
+          </div>
+
+          <span role="separator" aria-orientation="vertical" class="toolbar-sep"></span>
+
+          <!-- One-shot Actions Group (NO aria-pressed per toolbar guidance) -->
+          <div role="group" aria-label="Cosmic actions" class="toolbar-group">
+            <button type="button" id="btn-fling" class="hud-btn accent-btn" title="Launch a rogue star into the singularity (Key F)">
+              + Fling Star
+            </button>
+            <button type="button" id="btn-supernova" class="hud-btn warn-btn" title="Detonate a gravitational shockwave pulse (Key X)">
+              Pulse
+            </button>
+            <button type="button" id="btn-polytope" class="hud-btn" title="Morph 4D polytope: Tesseract / 24-Cell / 16-Cell (Key T)">
+              4D: 8-Cell
+            </button>
+          </div>
+
+          <span role="separator" aria-orientation="vertical" class="toolbar-sep"></span>
+
+          <!-- Toggle Controls Group -->
+          <div role="group" aria-label="Simulation modes" class="toolbar-group">
+            <button type="button" id="btn-warp" class="hud-btn" aria-pressed="false" title="Engage hyper-warp distortion (Key W)">
+              Warp
+            </button>
+            <button type="button" id="btn-cage" class="hud-btn" aria-pressed="true" title="Toggle 4D Dyson polytope cage">
+              4D Cage
+            </button>
+            <button type="button" id="btn-autocam" class="hud-btn" aria-pressed="true" title="Toggle cinematic auto-orbit camera (Key C)">
+              Orbit
+            </button>
+            <button type="button" id="btn-audio" class="hud-btn" aria-pressed="false" title="Toggle procedural Interstellar space synth (Key M)">
+              Audio
+            </button>
+            <button type="button" id="btn-mic" class="hud-btn" aria-pressed="false" title="React visuals to live microphone audio">
+              Mic
+            </button>
+            <!-- Pause button changes label instead of using aria-pressed (WCAG 2.2.2) -->
+            <button type="button" id="btn-pause" class="hud-btn" title="Pause or resume simulation (Key P)">
+              Pause
+            </button>
+          </div>
+
+          <span role="separator" aria-orientation="vertical" class="toolbar-sep"></span>
+
+          <!-- Popover Lab Drawer Trigger -->
+          <button
+            type="button"
+            id="btn-lab"
+            class="hud-btn"
+            popovertarget="singularity-lab"
+            aria-expanded="false"
+            aria-controls="singularity-lab"
+            title="Open Singularity Lab parameters"
+          >
+            Lab
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Restore HUD button (only visible when HUD is hidden via H) -->
+    <button type="button" id="btn-show-hud" class="show-hud-pill" hidden>
+      Show HUD (H)
+    </button>
+
+    <!-- Native Top-Layer Popover: Singularity Lab Controls -->
+    <section
+      id="singularity-lab"
+      popover="auto"
+      aria-labelledby="lab-title"
+      class="lab-popover"
+    >
+      <div class="lab-header">
+        <h2 id="lab-title">SINGULARITY LAB</h2>
+        <button type="button" id="btn-lab-close" class="lab-close-btn" aria-label="Close Singularity Lab">
+          ✕
+        </button>
+      </div>
+
+      <form class="lab-form" onsubmit="return false;">
+        <div class="control-row">
+          <label for="ctrl-spin">
+            <span>Kerr Spin (a*)</span>
+            <output id="val-spin">0.72</output>
+          </label>
+          <input type="range" id="ctrl-spin" min="-1.5" max="1.5" step="0.02" value="0.72" />
+        </div>
+
+        <div class="control-row">
+          <label for="ctrl-lensing">
+            <span>Gravitational Lensing</span>
+            <output id="val-lensing">1.00</output>
+          </label>
+          <input type="range" id="ctrl-lensing" min="0.2" max="2.0" step="0.02" value="1.00" />
+        </div>
+
+        <div class="control-row">
+          <label for="ctrl-density">
+            <span>Accretion Plasma</span>
+            <output id="val-density">1.00</output>
+          </label>
+          <input type="range" id="ctrl-density" min="0.2" max="2.2" step="0.05" value="1.00" />
+        </div>
+
+        <div class="control-row">
+          <label for="ctrl-rot4d">
+            <span>4D Rotation Speed</span>
+            <output id="val-rot4d">0.55</output>
+          </label>
+          <input type="range" id="ctrl-rot4d" min="0.0" max="2.4" step="0.05" value="0.55" />
+        </div>
+
+        <div class="control-row">
+          <label for="ctrl-bloom">
+            <span>Relativistic Bloom</span>
+            <output id="val-bloom">0.48</output>
+          </label>
+          <input type="range" id="ctrl-bloom" min="0.0" max="1.6" step="0.02" value="0.48" />
+        </div>
+
+        <div class="control-row">
+          <label for="ctrl-time">
+            <span>Time Scale</span>
+            <output id="val-time">1.00x</output>
+          </label>
+          <input type="range" id="ctrl-time" min="0.05" max="2.5" step="0.05" value="1.00" />
+        </div>
+
+        <div class="control-check">
+          <label for="ctrl-autospawn">
+            <input type="checkbox" id="ctrl-autospawn" class="lab-checkbox" checked />
+            <span>Auto-spawn wandering rogue stars</span>
+          </label>
+        </div>
+      </form>
+    </section>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
