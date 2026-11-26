@@ -2,6 +2,8 @@
 
 An interactive real-time **Three.js + WebGL2 (GLSL3)** relativistic black hole, 4D polytope megastructure, and gravitational tidal-disruption sandbox with zero-asset procedural Web Audio synthesis.
 
+Human note: This is the single prompt: "build the wildest thing you can with three.js. Don't ask any questions just do it."
+
 ---
 
 ## Quick Start
